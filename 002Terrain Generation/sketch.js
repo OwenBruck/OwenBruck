@@ -28,14 +28,14 @@ function drawTerrain(){
     rectValTime += noiseShift;
     let rectHeight = rectVal;
     rect(x,height, x+rectWidth, height - rectHeight);
-    if (rectVal > bigY){
-      bigY = rectVal;
+    if (height-rectHeight > bigY){
+      bigY = height-rectHeight;
       flagX = x;
     }
   }
-  strokeWeight(5);
+  strokeWeight(7);
   stroke("red");
-  line(flagX,bigY,flagX,bigY-15);
+  line(flagX,bigY,flagX,bigY-25);
 }
 
 function draw() {
