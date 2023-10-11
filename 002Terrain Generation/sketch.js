@@ -27,15 +27,19 @@ function drawTerrain(){
     rectVal = map(rectVal,0,1,0,height);
     rectValTime += noiseShift;
     let rectHeight = rectVal;
+
     rect(x,height, x+rectWidth, height - rectHeight);
-    if (height-rectHeight > bigY){
-      bigY = height-rectHeight;
+    if (rectHeight > bigY){
+      bigY = rectHeight;
       flagX = x;
     }
   }
+
+  bigY = height-bigY;
   strokeWeight(7);
   stroke("red");
-  line(flagX,bigY,flagX,bigY-25);
+  line(flagX,bigY,flagX,bigY-40);
+  triangle(flagX,bigY-25,flagX,bigY-40,flagX+15,bigY-32);
 }
 
 function draw() {
