@@ -63,7 +63,7 @@ function draw() {
   background(220);
   //slides the image along
   rectValTime=noiseShift + noiseChange;
-  noiseChange+=0.01;
+  noiseChange+=0.015;
   //calls all the drawing, and draws a line across the screen
   //at the average height
   drawTerrain();
