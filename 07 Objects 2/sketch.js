@@ -59,6 +59,7 @@ class MovingPoint{
   getY(){
     return this.x;
   }
+  
   move(){
     let xSpeed = noise(this.xTime);
     xSpeed = map(xSpeed,0,1,-this.maxSpeed,this.maxSpeed);
