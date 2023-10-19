@@ -7,6 +7,7 @@
 //globals
 let topLane = [];
 let bottomLane = [];
+let trafic = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -16,11 +17,17 @@ function setup() {
   for(let i = 0; i<20;i++){
     bottomLane.push(new Vehicle(1,Math.floor(random(0,2)),random(0,width),random(height*0.8-25,height/2+5)));
   }
+  
 
+}
+function keyPressed(){
+  if(keyCode === " "){
+    trafic.push(new TraficLight(true));
+  }
 }
 
 function draw() {
-  background(220);
+  background(50);
   drawRoad();
   for(let t of topLane){
     t.action();
@@ -52,6 +59,8 @@ class Vehicle{
     this.y=y;
     this.color= color(random(0,255),random(0,255),random(0,255));
     this.s = random(5,20);
+    this.numToHundred = 0;
+  
   }
   display(){
   //draw vehicle baces on type
@@ -96,19 +105,52 @@ class Vehicle{
   }
   speedUp(){
   //speeding up vehicle
+    if(this.s <25){
+      this.s += random(1,5);
+    }
     
       
   }
   speedDown(){
   //slowing down vehicle
+    this.s -= random(1,5);
+    if(this.s < 0 ){
+      this.s = 5;
+    }
   }
   changeColor(){
   //changing color 
+    this.color= color(random(0,255),random(0,255),random(0,255));
+
   }
-  action(){
+
+  action(){ 
+    // calls all functions when needed
     this.display();
     this.move();
-    this.speedUp();
-  // calls all functions when needed
+    this.traficLight();
+    this.numToHundred = Math.floor(random(0,101));
+    if (this.numToHundred === 1){
+      this.speedUp();
+    }
+    if (this.numToHundred === 2){
+      this.speedDown();
+    }
+    if (this.numToHundred === 3){
+      this.changeColor(); 
+    }
+
+  }
+}
+
+class TraficLight{
+  constructor(bool){
+    this.red = bool;
+  }
+  display(){
+    if (this.red){
+      fill("red");
+      circle(width/2, 10, 10);
+    }
   }
 }
