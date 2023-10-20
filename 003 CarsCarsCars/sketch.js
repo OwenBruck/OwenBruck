@@ -7,7 +7,7 @@
 //globals
 let topLane = [];
 let bottomLane = [];
-let trafic = [];
+let traficLight = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -17,14 +17,26 @@ function setup() {
   for(let i = 0; i<20;i++){
     bottomLane.push(new Vehicle(1,Math.floor(random(0,2)),random(0,width),random(height*0.8-25,height/2+5)));
   }
-  
+  traficLight.push(new TraficLight(false));
 
 }
-function keyPressed(){
-  if(keyCode === " "){
-    trafic.push(new TraficLight(true));
+function mouseClicked(){
+  if(keyIsPressed && keyCode === SHIFT){
+    bottomLane.push(new Vehicle(1,Math.floor(random(0,2)),random(0,width),random(height*0.8-25,height/2+5)));
+  }
+  else{
+    topLane.push(new Vehicle(0,Math.floor(random(0,2)),random(0,width),random(height*0.2,height/2-25)));
   }
 }
+
+function keyPressed(){
+  if(keyIsPressed && key === " "){
+    traficLight.pop();
+    traficLight.push(new TraficLight(true));
+  }
+}
+
+
 
 function draw() {
   background(50);
@@ -34,6 +46,9 @@ function draw() {
   }
   for(let b of bottomLane){
     b.action();
+  }  
+  for(let l of traficLight){
+    l.display();
   }
 
 }
@@ -127,30 +142,47 @@ class Vehicle{
   action(){ 
     // calls all functions when needed
     this.display();
-    this.move();
-    this.traficLight();
-    this.numToHundred = Math.floor(random(0,101));
-    if (this.numToHundred === 1){
-      this.speedUp();
-    }
-    if (this.numToHundred === 2){
-      this.speedDown();
-    }
-    if (this.numToHundred === 3){
-      this.changeColor(); 
-    }
+    if(traficLight[0].redLight===false){
+      this.move();
+      
+      this.numToHundred = Math.floor(random(0,101));
+      if (this.numToHundred === 1){
+        this.speedUp();
+      }
+      if (this.numToHundred === 2){
+        this.speedDown();
+      }
+      if (this.numToHundred === 3){
+        this.changeColor(); 
+      }
 
-  }
+    }
+  } 
 }
 
 class TraficLight{
-  constructor(bool){
-    this.red = bool;
+  constructor(trueOrFalse){
+    this.redLight = trueOrFalse;
+    this.count = 120;
   }
   display(){
-    if (this.red){
+    if (this.redLight === true){
       fill("red");
-      circle(width/2, 10, 10);
+      circle(width/2, 20, 20);
+      this.count -= 1;
+      if (this.count<0){
+        fill("green");
+        circle(width/2, 20, 20);
+        this.redlight= false;
+      }
     }
+    else{
+      this.redlight= false;
+      fill("green");
+      circle(width/2, 20, 20);
+    }
+    
   }
 }
+
+
