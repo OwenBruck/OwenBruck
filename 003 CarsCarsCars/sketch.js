@@ -7,7 +7,7 @@
 //globals
 let topLane = [];
 let bottomLane = [];
-let traficLight = [];
+let traficLight;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -17,7 +17,7 @@ function setup() {
   for(let i = 0; i<20;i++){
     bottomLane.push(new Vehicle(1,Math.floor(random(0,2)),random(0,width),random(height*0.8-25,height/2+5)));
   }
-  traficLight.push(new TraficLight(false));
+  traficLight=new TraficLight(false);
 
 }
 function mouseClicked(){
@@ -31,8 +31,7 @@ function mouseClicked(){
 
 function keyPressed(){
   if(keyIsPressed && key === " "){
-    traficLight.pop();
-    traficLight.push(new TraficLight(true));
+    traficLight.redLight = true;
   }
 }
 
@@ -47,9 +46,9 @@ function draw() {
   for(let b of bottomLane){
     b.action();
   }  
-  for(let l of traficLight){
-    l.display();
-  }
+  
+  traficLight.display();
+  
 
 }
 
@@ -142,7 +141,7 @@ class Vehicle{
   action(){ 
     // calls all functions when needed
     this.display();
-    if(traficLight[0].redLight===false){
+    if(traficLight.redLight===false){
       this.move();
       
       this.numToHundred = Math.floor(random(0,101));
@@ -158,7 +157,7 @@ class Vehicle{
 
     }
   } 
-}
+}  
 
 class TraficLight{
   constructor(trueOrFalse){
@@ -173,11 +172,12 @@ class TraficLight{
       if (this.count<0){
         fill("green");
         circle(width/2, 20, 20);
-        this.redlight= false;
+        this.redLight = false;
+        this.count = 120;
       }
     }
-    else{
-      this.redlight= false;
+    else{ 
+      
       fill("green");
       circle(width/2, 20, 20);
     }
