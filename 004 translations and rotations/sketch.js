@@ -5,12 +5,12 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-
+let rotationS=1;
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
 }
-frameCount(10);
+
 function draw() {
   background(220);
   circle(width/2,height/2,500);
@@ -31,10 +31,10 @@ function draw() {
 
   }
   
-  let rotationS=6;
+
   rotate(radians(rotationS));
   line(0,0,100,0);
-  rotationS += 1;
+  rotationS += 0.5;
   
 
   
