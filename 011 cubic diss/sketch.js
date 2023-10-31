@@ -30,6 +30,12 @@ function drawRec(){
   }
 }
 
+function keyPressed(){
+  if (key ==="s"){
+    save("CS30 Image.png");
+  }
+}
+
 function draw() {
   background(220);
   drawRec();
