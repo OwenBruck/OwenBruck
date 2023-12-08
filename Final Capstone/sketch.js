@@ -5,9 +5,7 @@
 // Globals
 let shipX = 400;
 let shipSpeed = 10;
-let alienX = 40;
 let shift = false;
-
 let aliens = [];
 
 
@@ -39,27 +37,25 @@ function drawShip(x){
 }
 
 function generateAliens(){
-  let tempArray = [];
-  for(let x = 0; x<11; x++){
-    tempArray.push(new Alien(x,0,2));
+  let tempArray =[]
+  for(let y = 40; y <= 200; y += 40){
+    tempArray = [];
+    for(let x = 40; x <= 440 ; x +=40){
+      if(y===40){
+        tempArray.push(new Alien(x,y,2));
+      }
+      else if (y <= 120){
+        tempArray.push(new Alien(x,y,1));
+      }
+      else{
+        tempArray.push(new Alien(x,y,0));
+      }
+    }  
+    aliens.push(tempArray); 
   }
-  aliens.push(tempArray);
+} 
 
-  for(let i =0; i<2; i++){
-    tempArray = [];
-    for(let x = 0; x<11; x++){ 
-      tempArray.push(new Alien(x,i+1,1));
-    }
-    aliens.push(tempArray);
-  }
-  for(let i =0; i<2; i++){
-    tempArray = [];
-    for(let x = 0; x<11; x++){
-      tempArray.push(new Alien(x,i+3,0));
-    }
-    aliens.push(tempArray);
-  }
-}
+ 
 
 function moveShip(){
   if (keyIsDown(LEFT_ARROW)){
@@ -79,44 +75,61 @@ function moveShip(){
 class Alien{
   constructor(x,y,type){
     this.type = type;
-    this.x = x  * 45;
-    this.y = y * 45;
+    this.x = x;
+    this.y = y;
     this.speed = 20;
   }
   display(){
     if (this.type === 0){
       fill("red");
-      square(this.x,this.y+alienX,35);
+      square(this.x,this.y,35);
     }
 
     else if (this.type === 1){
       fill("blue");
-      square(this.x,this.y+alienX,35);
+      square(this.x,this.y,35);
     }
 
     else {
       fill("green");
-      square(this.x,this.y+alienX,35);
+      square(this.x,this.y,35);
     }
   }
   move(){
     if(frameCount % 15 === 0){
       this.x += this.speed;
     }
-    if(this.x>765){
-      this.x = 765;
-      shift = true;
-    }
-    if(this.x<0){
-      shift = true;
-    }
-    if(shift){
-      this.speed= this.speed * -1;
-      this.y += 40;
-    }
   }
+  changeDirectionL(){
+    this.speed *= -1;
+    this.y += 40; 
+    this.x -= 20;
+   
+  }
+  changeDirectionR(){
+    this.speed *= -1;
+    this.y += 40; 
+    this.x += 20;
+  
+  }
+
   action(){
     this.display();
     this.move();
+
+    if(this.x>width-80){
+      for (let row in aliens){
+        for (let a in aliens[row]){
+          aliens[row][a].changeDirectionL();
+        }
+      }
+    }
+    if(this.x<40){
+      for (let row in aliens){
+        for (let a in aliens[row]){
+          aliens[row][a].changeDirectionR();
+        }
+      }
+    }
   }
 }
