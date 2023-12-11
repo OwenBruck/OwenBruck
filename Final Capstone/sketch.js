@@ -5,8 +5,8 @@
 // Globals
 let shipX = 400;
 let shipSpeed = 10;
-let shift = false;
 let aliens = [];
+let gameOver = false;
 
 
 
@@ -24,7 +24,6 @@ function draw() {
       aliens[row][a].action();
     }
   }
-  shift = false;
 }
 
 function keyPressed(){
@@ -37,7 +36,7 @@ function drawShip(x){
 }
 
 function generateAliens(){
-  let tempArray =[]
+  let tempArray =[];
   for(let y = 40; y <= 200; y += 40){
     tempArray = [];
     for(let x = 40; x <= 440 ; x +=40){
@@ -96,7 +95,7 @@ class Alien{
     }
   }
   move(){
-    if(frameCount % 15 === 0){
+    if(frameCount % 25 === 0){
       this.x += this.speed;
     }
   }
@@ -115,21 +114,27 @@ class Alien{
 
   action(){
     this.display();
-    this.move();
+    if(!gameOver){
+      if(this.x>width-75){
+        for (let row in aliens){
+          for (let a in aliens[row]){
+            aliens[row][a].changeDirectionL();
+          }
+        }
+      }
 
-    if(this.x>width-80){
-      for (let row in aliens){
-        for (let a in aliens[row]){
-          aliens[row][a].changeDirectionL();
+      if(this.x<40){
+        for (let row in aliens){
+          for (let a in aliens[row]){
+            aliens[row][a].changeDirectionR();
+          }
         }
       }
-    }
-    if(this.x<40){
-      for (let row in aliens){
-        for (let a in aliens[row]){
-          aliens[row][a].changeDirectionR();
-        }
+
+      if(this.y > height - 100){
+        gameOver= true;
       }
+      this.move();
     }
   }
 }
