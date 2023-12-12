@@ -6,7 +6,11 @@
 let shipX = 400;
 let shipSpeed = 10;
 let aliens = [];
+let bullets = [];
 let gameOver = false;
+let backgroundColor = 150;
+let score = 0;
+let alienGap = 40;
 
 
 
@@ -16,18 +20,32 @@ function setup() {
 }
 
 function draw() {
-  background(220);
+  background(backgroundColor);
   drawShip(shipX);
   moveShip();
+  endGame();
   for (let row in aliens){
     for (let a in aliens[row]){
       aliens[row][a].action();
     }
   }
+  for (let row in aliens){
+    for (let a in aliens[row]){
+      aliens[row][a].display();
+    }
+  }
 }
 
 function keyPressed(){
- 
+  if(key === " "){
+    bullets.push(new ShipBullet(shipX, 750));
+  }
+}
+
+function endGame(){
+  if(gameOver){
+    backgroundColor = color(80,0,0);
+  }
 }
 
 function drawShip(x){
@@ -37,7 +55,7 @@ function drawShip(x){
 
 function generateAliens(){
   let tempArray =[];
-  for(let y = 40; y <= 200; y += 40){
+  for(let y = alienGap; y <= alienGap * 5; y += 40){
     tempArray = [];
     for(let x = 40; x <= 440 ; x +=40){
       if(y===40){
@@ -53,8 +71,6 @@ function generateAliens(){
     aliens.push(tempArray); 
   }
 } 
-
- 
 
 function moveShip(){
   if (keyIsDown(LEFT_ARROW)){
@@ -77,6 +93,7 @@ class Alien{
     this.x = x;
     this.y = y;
     this.speed = 20;
+    this.needToDrop = 0;
   }
   display(){
     if (this.type === 0){
@@ -96,45 +113,61 @@ class Alien{
   }
   move(){
     if(frameCount % 25 === 0){
-      this.x += this.speed;
+      
+      if(this.needToDrop === 1){
+        this.y+=40;
+        this.needToDrop =0;
+      }
+      else{
+        this.x += this.speed;
+      }
     }
   }
-  changeDirectionL(){
+  changeDirection(){
     this.speed *= -1;
-    this.y += 40; 
-    this.x -= 20;
+    this.needToDrop = 1;
+    // this.y += 40; 
+    // this.x -= 20;
    
   }
-  changeDirectionR(){
-    this.speed *= -1;
-    this.y += 40; 
-    this.x += 20;
-  
-  }
+
 
   action(){
-    this.display();
     if(!gameOver){
-      if(this.x>width-75){
+      if(this.x>width-75 && this.speed > 0){
         for (let row in aliens){
           for (let a in aliens[row]){
-            aliens[row][a].changeDirectionL();
+            aliens[row][a].changeDirection();
           }
         }
       }
 
-      if(this.x<40){
+      if(this.x<40 && this.speed < 1){
         for (let row in aliens){
           for (let a in aliens[row]){
-            aliens[row][a].changeDirectionR();
+            aliens[row][a].changeDirection();
           }
         }
       }
 
       if(this.y > height - 100){
         gameOver= true;
-      }
-      this.move();
+      }  
+      this.move(); 
     }
+  }
+}
+
+class ShipBullet{
+  constructor(x,y){
+    this.x = x;
+    this.y = y;
+    this.bulletSpeed = 20;
+  }
+  display(){
+    rect();
+  }
+  move(){
+    this.y -= this.bulletSpeed;
   }
 }
