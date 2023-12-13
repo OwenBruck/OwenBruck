@@ -8,7 +8,7 @@ let shipSpeed = 10;
 let aliens = [];
 let bullets = [];
 let gameOver = false;
-let backgroundColor = 20;
+let backgroundColor = 30;
 let score = 0;
 let alienGap = 100;
 let alien00;
@@ -32,29 +32,43 @@ function preload(){
 function setup() {
   createCanvas(800, 800);
   generateAliens();
+  noStroke();
 }
 
 function draw() {
-  background(backgroundColor);
+  background(backgroundColor); 
+  frame();
   drawShip(shipX);
   moveShip();
   endGame();
-  for (let row in aliens){
-    for (let a in aliens[row]){
-      aliens[row][a].action();
+  for(let i=0; i<bullets.length;i++){
+    bullets[i].action();
+    if (bullets[i].y < 0 || bullets[i].y > height-100){ 
+      bullets.splice(i,1);
     }
   }
+  for (let row in aliens){
+    for (let a in aliens[row]){   
+      aliens[row][a].action();
+    }
+  } 
   for (let row in aliens){
     for (let a in aliens[row]){
       aliens[row][a].display();
     }
   }
+  
 }
 
 function keyPressed(){
   if(key === " "){
-    bullets.push(new ShipBullet(shipX, 750));
+    bullets.push(new Bullet(shipX, 650, 0));
   }
+}
+
+function frame(){
+  fill(0,150,0);
+  rect(0,700,width,3);
 }
 
 function endGame(){
@@ -65,7 +79,7 @@ function endGame(){
 
 function drawShip(x){
   fill("white");
-  image(ship0,x,650,ship0.width+15, ship0.height+10)
+  image(ship0,x,650,ship0.width+15, ship0.height+10);
 }
 
 function generateAliens(){
@@ -109,23 +123,51 @@ class Alien{
     this.y = y;
     this.speed = 10;
     this.needToDrop = 0;
+    this.version = 0;
   }
   display(){
     if (this.type === 0){
       fill("red");
-      image(alien00,this.x,this.y,alien00.width)
+      if (this.version === 0){
+        image(alien00,this.x,this.y,alien00.width);
+      }
+      if (this.version === 1){
+        image(alien01,this.x,this.y,alien01.width);
+      }
     }
 
     else if (this.type === 1){
       fill("blue");
-      image(alien10,this.x,this.y,alien10.width+5)
+      if (this.version === 0){
+        image(alien10,this.x+3,this.y,alien10.width);
+      }
+      if (this.version === 1){
+        image(alien11,this.x+3,this.y,alien11.width);
+      }
     }
 
     else {
       fill("green");
-      image(alien20,this.x + 6,this.y,alien20.width+3)
+      if (this.version === 0){
+        image(alien20,this.x+7,this.y,alien20.width);
+      }
+      if (this.version === 1){
+        image(alien21,this.x+7,this.y,alien21.width);
+      }
     }
   }
+
+  changeSprite(){
+    if (frameCount % 30 === 0){
+      if (this.version === 0){
+        this.version = 1;
+      }
+      else if (this.version === 1){
+        this.version = 0;
+      }
+    }
+  }
+
   move(){
     if(frameCount % 30 === 0){
       
@@ -138,10 +180,11 @@ class Alien{
       }
     }
   }
+
   changeDirection(){
     this.speed *= -1;
     this.needToDrop = 1;
-   
+  
   }
 
 
@@ -167,20 +210,31 @@ class Alien{
         gameOver= true;
       }  
       this.move(); 
+      this.changeSprite();
     }
   }
 }
 
-class ShipBullet{
-  constructor(x,y){
+class Bullet{
+  constructor(x,y, type){
     this.x = x;
     this.y = y;
+    this.type;
     this.bulletSpeed = 20;
+    this.alive=true;
   }
   display(){
-    rect();
+    fill(77,200,240);
+    rect(this.x + 27,this.y,3,10);
   }
+
   move(){
-    this.y -= this.bulletSpeed;
+    this.y -= this.bulletSpeed; 
+  } 
+  action(){
+    this.move();
+    this.display();
   }
+ 
+
 }
