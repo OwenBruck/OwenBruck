@@ -3,10 +3,11 @@
 // 
 
 // Globals
-let shipX = 400;
-let shipSpeed = 8;
+let shipX = 340;
+let shipSpeed = 7;
 let aliens = [];
-let bullets = [];
+let shipBullets = [];
+let alienBullets = [];
 let gameOver = false;
 let backgroundColor = 30;
 let score = 0;
@@ -18,7 +19,6 @@ let alien01;
 let alien11;
 let alien21;
 let ship0;
-let bulletTimer = 0;
 
 function preload(){
   alien00 = loadImage("assets/alien00.png");
@@ -37,18 +37,22 @@ function setup() {
 }
 
 function draw() {
-  if(bulletTimer != 0){
-    bulletTimer -=1;
-  }
   background(backgroundColor); 
   frame();
   drawShip(shipX);
   moveShip();
   endGame();
-  for(let i=0; i<bullets.length;i++){
-    bullets[i].action();
-    if (bullets[i].y < 0 || bullets[i].y > height-100 || bullets[i].alive === false){ 
-      bullets.splice(i,1);
+  isShipShot();
+  for(let b in alienBullets){
+    alienBullets[b].action();
+    if(alienBullets[b].y > 670){
+      alienBullets.splice(b,1);
+    }
+  } 
+  for(let i=0; i<shipBullets.length;i++){
+    shipBullets[i].action();
+    if (shipBullets[i].y < 0 || shipBullets[i].y > height-100 || shipBullets[i].alive === false){ 
+      shipBullets.splice(i,1);
     }
   }
   
@@ -62,7 +66,7 @@ function draw() {
   for (let row in aliens){
     for (let a in aliens[row]){   
       aliens[row][a].action();
-    }
+    } 
   } 
   for (let row in aliens){
     for (let a in aliens[row]){
@@ -73,10 +77,9 @@ function draw() {
 }
 
 function keyPressed(){
-  if(bulletTimer === 0){
+  if(shipBullets.length<1){
     if(key === " "){
-      bullets.push(new Bullet(shipX, 650, 0));
-      bulletTimer = 20;
+      shipBullets.push(new Bullet(shipX, 650, 5));
     }
   }
 }
@@ -97,6 +100,34 @@ function drawShip(x){
   image(ship0,x,650,ship0.width+15, ship0.height+10);
 }
 
+function moveShip(){
+  if(gameOver === false){
+    if (keyIsDown(LEFT_ARROW)){
+      shipX -= shipSpeed;
+      if (shipX<0){
+        shipX = 0;
+      }
+    }
+  
+    if (keyIsDown(RIGHT_ARROW)){
+      shipX += shipSpeed;
+      if (shipX>760){
+        shipX = 760;
+      }
+    }
+  }
+}
+
+function isShipShot(){
+  for(let b in alienBullets){
+    if(alienBullets[b].y > 633){
+      if(alienBullets[b].x > shipX-32 && alienBullets[b].x < shipX +28){
+        gameOver = true;
+      }
+    }
+  }
+}
+
 function generateAliens(){
   let tempArray =[];
   for(let y = 40; y <= 200; y += 40){
@@ -115,21 +146,6 @@ function generateAliens(){
     aliens.push(tempArray); 
   }
 } 
-
-function moveShip(){
-  if (keyIsDown(LEFT_ARROW)){
-    shipX -= shipSpeed;
-    if (shipX<0){
-      shipX = 0;
-    }
-  }
-  if (keyIsDown(RIGHT_ARROW)){
-    shipX += shipSpeed;
-    if (shipX>760){
-      shipX = 760;
-    }
-  }
-}
 
 class Alien{
   constructor(x,y,type){
@@ -173,6 +189,21 @@ class Alien{
     }
   }
 
+  attack(){
+    if (this.type === 1){
+      this.num = floor(random(2000));
+      if(this.num===1){
+        alienBullets.push(new Bullet(this.x, this.y, 1));
+      }
+    }
+    if (this.type === 2){
+      this.num = floor(random(2000));
+      if(this.num===1){
+        alienBullets.push(new Bullet(this.x, this.y, 2));
+      }
+    }
+  }
+
   changeSprite(){
     if (frameCount % 30 === 0){
       if (this.version === 0){
@@ -186,21 +217,21 @@ class Alien{
 
   checkIfShot(){
     if(this.type === 0 || this.type ===1){
-      for(let b in bullets){
-        if (bullets[b].x >= this.x-33 && bullets[b].x <= this.x + 10){
-          if(bullets[b].y >= this.y && bullets[b].y <= this.y + 35){
+      for(let b in shipBullets){
+        if (shipBullets[b].x >= this.x-33 && shipBullets[b].x <= this.x + 10){
+          if(shipBullets[b].y >= this.y && shipBullets[b].y <= this.y + 35){
             this.isShot = true; 
-            bullets[b].alive = false;
+            shipBullets[b].alive = false;
           }
         } 
       } 
     }
     if(this.type === 2){
-      for(let b in bullets){
-        if (bullets[b].x >= this.x-27 && bullets[b].x <= this.x + 5){
-          if(bullets[b].y >= this.y && bullets[b].y <= this.y + 35){
+      for(let b in shipBullets){
+        if (shipBullets[b].x >= this.x-27 && shipBullets[b].x <= this.x + 5){
+          if(shipBullets[b].y >= this.y && shipBullets[b].y <= this.y + 35){
             this.isShot = true; 
-            bullets[b].alive = false;
+            shipBullets[b].alive = false;
           }
         } 
       } 
@@ -249,6 +280,7 @@ class Alien{
       this.move(); 
       this.changeSprite();
       this.checkIfShot();
+      this.attack();
     }
   }
 }
@@ -257,20 +289,40 @@ class Bullet{
   constructor(x,y, type){
     this.x = x;
     this.y = y;
-    this.type;
-    this.bulletSpeed = 20;
+    this.type = type;
+    this.bulletSpeed = 12;
     this.alive=true;
   }
   display(){
-    fill(77,200,240);
-    rect(this.x + 30,this.y+15,3,10);
+    if (this.type === 5){
+      fill(77,200,240);
+      rect(this.x + 30,this.y+15,3,10);
+    }
+    if (this.type === 1){
+      fill(150,20,20);
+      rect(this.x + 30,this.y+15,5,10);
+    }
+    if (this.type === 2){
+      fill(200, 50, 100);
+      rect(this.x + 30,this.y+15,5,10);
+    }
   }
 
   move(){
-    this.y -= this.bulletSpeed; 
+    if (this.type === 5){
+      this.y -= this.bulletSpeed; 
+    }
+    if (this.type === 1){
+      this.y += this.bulletSpeed-7; 
+    }
+    if (this.type === 2){
+      this.y += this.bulletSpeed-4; 
+    }
   } 
   action(){
-    this.move();
+    if (gameOver === false){
+      this.move();
+    }
     this.display();
   }
  
