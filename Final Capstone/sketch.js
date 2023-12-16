@@ -12,6 +12,8 @@ let alienBullets = [];
 let gameOver = false;
 let backgroundColor = 30;
 let score = 0;
+let time = 0;
+let intervalID;
 let alienGap = 100;
 let alien00;
 let alien10;
@@ -104,8 +106,11 @@ function keyPressed(){
 
 
 function frame(){
-  fill(0,150,0);
+  fill(180,5,5);
   rect(0,700,width,3);
+  textSize(20);
+  text("Score " + score, width/2 - 34, 50);
+  text("Time " + time, width*.8 - 34, 50);
 }
 
 
@@ -175,6 +180,13 @@ function generateAliens(){
     aliens.push(tempArray); 
   }
 } 
+
+intervalID = setInterval(timer, 1000);
+function timer(){
+  if(gameOver === false){
+    time +=1; 
+  }
+}
 
 
 class Alien{
@@ -252,7 +264,14 @@ class Alien{
         if (shipBullets[b].x >= this.x-33 && shipBullets[b].x <= this.x + 10){
           if(shipBullets[b].y >= this.y && shipBullets[b].y <= this.y + 35){
             this.isShot = true; 
+            if(this.type === 0){
+              score+=10
+            }
+            if(this.type === 1){
+              score+=20
+            }
             shipBullets[b].alive = false;
+
           }
         } 
       } 
@@ -262,6 +281,7 @@ class Alien{
         if (shipBullets[b].x >= this.x-27 && shipBullets[b].x <= this.x + 5){
           if(shipBullets[b].y >= this.y && shipBullets[b].y <= this.y + 35){
             this.isShot = true; 
+            score+=40;
             shipBullets[b].alive = false;
           }
         } 
@@ -329,8 +349,10 @@ class DeadAlien{
     this.timer -= 1;
     this.moveX += 0.3;
     
-    if(aliens[0][0].speed>1){
-      image(explotion,this.x-7+this.moveX,this.y,explotion.width/16,explotion.height/16);
+    if(aliens.length>0){
+      if(aliens[0][0].speed>1){
+        image(explotion,this.x-7+this.moveX,this.y,explotion.width/16,explotion.height/16);
+      }
     }
 
     else{
