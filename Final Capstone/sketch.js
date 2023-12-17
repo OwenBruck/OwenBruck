@@ -9,20 +9,26 @@ let aliens = [];
 let deadAliens = [];
 let shipBullets = [];
 let alienBullets = [];
-let gameOver = false;
 let backgroundColor = 30;
 let score = 0;
 let time = 0;
 let intervalID;
 let alienGap = 100;
+let mouseOver = false;
 let alien00;
 let alien10;
 let alien20;
 let alien01;
 let alien11;
 let alien21;
+let UFO;
 let ship0;
 let explotion;
+let pixelFont;
+let home = false;
+let gameStart = false;
+let game = false;
+let gameOver = true;
 
 
 function preload(){
@@ -33,24 +39,29 @@ function preload(){
   alien11 = loadImage("assets/alien11.png");
   alien21 = loadImage("assets/alien21.png");
   ship0 = loadImage("assets/ship.png");
+  UFO = loadImage("assets/UFO.png");
   explotion = loadImage("assets/explotion.png");
+  pixelFont = loadFont("assets/dogicapixel.otf");
 }
 
 
 function setup() {
   createCanvas(800, 800);
-  generateAliens();
   noStroke();
 }
 
 
 function draw() {
   background(backgroundColor); 
-  frame();
-  drawShip(shipX);
-  moveShip();
+  startUp();
+  menu();
   endGame();
-  isShipShot();
+  if(game){
+    frame();
+    drawShip(shipX);
+    moveShip();
+    isShipShot();
+  
 
   for(let d in deadAliens){
     deadAliens[d].display();
@@ -93,6 +104,7 @@ function draw() {
       aliens[row][a].display();
     }
   }
+  }
 }
 
 
@@ -114,9 +126,100 @@ function frame(){
 }
 
 
+function startUp(){
+  if (gameStart){ 
+    generateAliens();
+    game = true;
+  }
+  gameStart = false;
+}
+
+
+function menu(){
+  if(home){
+    textFont(pixelFont);
+    fill(200);
+    // rect(width/2,0,1,800);
+    textSize(60);
+    text("Space",270,100);
+    fill("red");
+    text("Invaders",210,170);
+    image(alien00,260,230);
+    image(alien10,260,310);
+    image(alien20,262,390,alien20.width+4,alien20.height+4);
+    image(UFO,253,473);
+    textSize(20);
+    text("=   100 Points",325,253);
+    text("=   200 Points",325,333);
+    text("=   400 Points",325,413);
+    text("=   ? Points",325,495);
+    let color;
+    if(mouseX > 100 && mouseX < 700){
+      if(mouseY > 600 && mouseY < 700){
+        mouseOver = true;
+      }
+      else{
+        mouseOver = false;
+      }
+    }
+    else{
+      mouseOver = false;
+    }
+    if (mouseOver){
+      color = "darkred";
+    }
+    else{
+      color = 200;
+    }
+    fill(color);
+    rect(100,600,600, 100);
+    fill(0);
+    textSize(30);
+    text("Play Space Invaders",175,665);
+    if(mouseOver && mouseIsPressed === true){
+      home = false;
+      gameStart = true;
+    }
+  }
+}
+
+
+
 function endGame(){
   if(gameOver){
-    backgroundColor = color(80,0,0);
+    textFont(pixelFont);
+    textSize(50);
+    fill("darkRed")
+    text("Game Over",215,150);
+    game = false;
+    backgroundColor = 0;
+    if(mouseX > 300 && mouseX < 500){
+      if(mouseY > 700 && mouseY < 770){
+        mouseOver = true;
+      }
+      else{
+        mouseOver = false;
+      }
+    }
+    else{
+      mouseOver = false;
+    }
+    if (mouseOver){
+      color = "yellow";
+    }
+    else{
+      color = 100;
+    }
+    fill(color);
+    rect(300,700,200, 70);
+    fill(0);
+    textSize(30);
+    text("Menu",345,750);
+    if(mouseOver && mouseIsPressed === true){
+      home = true;
+      gameOver = false;
+      backgroundColor = 30;
+    }
   }
 }
 
