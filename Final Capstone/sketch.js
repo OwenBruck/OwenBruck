@@ -27,10 +27,10 @@ let UFO;
 let ship0;
 let explotion;
 let pixelFont;
-let home = false;
+let home = true;
 let gameStart = false;
 let game = false;
-let gameOver = true;
+let gameOver = false;
 
 
 function preload(){
@@ -68,6 +68,7 @@ function draw() {
 
     for(let d in deadAliens){
       deadAliens[d].display();
+      print(d);
       if(deadAliens[d].rem){
         deadAliens.splice(d,1);
       }
@@ -90,7 +91,9 @@ function draw() {
     for (let row in aliens){
       for (let a in aliens[row]){   
         if(aliens[row][a].isShot === true){
+          print(row,a);
           deadAliens.push(new DeadAlien(aliens[row][a].x, aliens[row][a].y));
+          print("Dead alien");
           aliens[row].splice(a,1);
         }
       }
@@ -224,6 +227,7 @@ function changeLevel(){
     }
     level +=1;
     alienGap += 40;
+    aliens.splice(0,aliens.length);
     generateAliens();
     shipX = width/2;
   }
@@ -234,8 +238,18 @@ function endGame(){
   if(gameOver){
     textFont(pixelFont);
     textSize(50);
-    fill("darkRed");
+    fill("red");
     text("Game Over",215,150);
+    textSize(30);
+    text("HighScore = " + highScore,255,260);
+    textSize(25);
+    text("Score = " + score,310,400);
+    text("Level = " + level,315,475);
+    text("Time = " + time,320,550);
+    image(alien00,50,230,alien00.width+12,alien00.height+10);
+    image(alien10,53,410,alien10.width+12,alien10.height+10);
+    image(alien20,700,230,alien20.width+15,alien20.height+14);
+    image(UFO,692,410,UFO.width+15,UFO.height+10);
     game = false;
     backgroundColor = 0;
     if(mouseX > 300 && mouseX < 500){
@@ -382,13 +396,13 @@ class Alien{
 
   attack(){
     if (this.type === 1){
-      this.num = floor(random(2000));
+      this.num = floor(random(1500));
       if(this.num===1){
         alienBullets.push(new Bullet(this.x, this.y, 1));
       }
     }
     if (this.type === 2){
-      this.num = floor(random(2000));
+      this.num = floor(random(1200));
       if(this.num===1){
         alienBullets.push(new Bullet(this.x, this.y, 2));
       }
@@ -529,11 +543,11 @@ class Bullet{
       rect(this.x + 30,this.y+15,3,10);
     }
     if (this.type === 1){
-      fill(150,20,20);
+      fill("red");
       rect(this.x + 30,this.y+15,5,10);
     }
     if (this.type === 2){
-      fill(200, 50, 100);
+      fill(250, 100, 200);
       rect(this.x + 30,this.y+15,5,10);
     }
   }
