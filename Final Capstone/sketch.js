@@ -80,7 +80,7 @@ function draw() {
       if(ufos[u].offScreen){
         ufos.splice(u,1);
       }
-      if(ufos[u].isShot === true){
+      else if(ufos[u].isShot === true){
         deadAliens.push(new DeadAlien(ufos[u].x, ufos[u].y));
         ufos.splice(u,1);
       }
@@ -356,7 +356,7 @@ function generateAliens(){
   let tempArray =[];
   for(let y = 40; y <= 200; y += 40){
     tempArray = [];
-    for(let x = 50; x <= 50 ; x +=50){
+    for(let x = 50; x <= 550 ; x +=50){
       if(y===40){
         tempArray.push(new Alien(x,y+alienGap,2));
       }
@@ -646,7 +646,7 @@ class UFO{
     this.offScreen = false;
     this.isShot = false;
     if(this.randomVal === 0){
-      this.x = 0;
+      this.x = -50;
       this.speed = 4;
     }
 
@@ -664,14 +664,14 @@ class UFO{
     //If vehicle goes off screen its moved to the other side
     if(this.randomVal === 0){
       this.x+= this.speed;
-      if(this.x>width){
+      if(this.x>width+50){
         this.offScreen = true;
       }
     }
 
     else{
       this.x-= this.speed;
-      if(this.x<0){
+      if(this.x<-50){
         this.offScreen = true;
       }
     }
