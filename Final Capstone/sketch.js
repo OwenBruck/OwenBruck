@@ -32,6 +32,7 @@ let home = true;
 let gameStart = false;
 let game = false;
 let gameOver = false;
+let levelChangeTime = 0;
 
 
 function preload(){
@@ -119,6 +120,9 @@ function draw() {
       for (let a in aliens[row]){
         aliens[row][a].display();
       }
+    }
+    if(levelChangeTime>0){
+      levelChangeTime--;
     }
   }
 }
@@ -246,12 +250,15 @@ function changeLevel(){
     if (shipBullets.length>0){
       shipBullets.splice(0,shipBullets.length);
     }
+    if (deadAliens.length>0){
+      deadAliens.splice(0,deadAliens.length);
+    }
 
     level +=1;
     alienGap += 40;
     aliens.splice(0,aliens.length);
     generateAliens();
-    shipX = width/2;
+    levelChangeTime = 60;
   }
 }
 
@@ -267,7 +274,7 @@ function endGame(){
     textSize(25);
     text("Score = " + score,310,400);
     text("Level = " + level,315,475);
-    text("Time = " + time,320,550);
+    text("Time = " + time,315,550);
     image(alien00,50,230,alien00.width+12,alien00.height+10);
     image(alien10,53,410,alien10.width+12,alien10.height+10);
     image(alien20,700,230,alien20.width+15,alien20.height+14);
@@ -544,11 +551,12 @@ class Alien{
       if(this.y > 650){
         gameOver= true;
       }  
-
-      this.move(); 
-      this.changeSprite();
-      this.checkIfShot();
-      this.attack();
+      if(levelChangeTime<1){
+        this.move(); 
+        this.changeSprite();
+        this.checkIfShot();
+        this.attack();
+      }
     }
   }
 }
