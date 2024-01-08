@@ -10,6 +10,7 @@ let deadAliens = [];
 let shipBullets = [];
 let alienBullets = [];
 let ufos = [];
+let meteors = [];
 let backgroundColor = 30;
 let score = 0;
 let time = 0;
@@ -27,6 +28,7 @@ let alien21;
 let ufo;
 let ship0;
 let explotion;
+let meteor;
 let pixelFont;
 let home = true;
 let gameStart = false;
@@ -46,6 +48,7 @@ function preload(){
   ufo = loadImage("assets/UFO.png");
   explotion = loadImage("assets/explotion.png");
   pixelFont = loadFont("assets/dogicapixel.otf");
+  meteor = loadImage("assets/meteor.png");
 }
 
 
@@ -74,6 +77,11 @@ function draw() {
       if(deadAliens[d].rem){
         deadAliens.splice(d,1);
       }
+    }
+
+    for(let m in meteors){
+      meteors[m].display();
+      
     }
 
     for(let u in ufos){
@@ -168,6 +176,8 @@ function startUp(){
     alienGap = 100;
     level = 1;
     generateAliens();
+    generateMeteors();
+    levelChangeTime = 40;
     game = true; 
   }
 
@@ -258,7 +268,7 @@ function changeLevel(){
     alienGap += 40;
     aliens.splice(0,aliens.length);
     generateAliens();
-    levelChangeTime = 60;
+    levelChangeTime = 30;
   }
 }
 
@@ -381,10 +391,20 @@ function generateAliens(){
   }
 } 
 
+
+function generateMeteors(){
+  let gap =205;
+  for(let i = 0.5; i <4.5; i++){
+    meteors.push(new Meteor(gap*i));
+  }
+}
+
 function makeUFO(){
-  let r = floor(random(500));
-  if(r===1){
-    ufos.push(new UFO());
+  if(ufos.length<1){
+    let r = floor(random(500));
+    if(r===1){
+      ufos.push(new UFO());
+    }
   }
 }
 
@@ -724,5 +744,19 @@ class UFO{
     this.move();
     this.speedUp();
     this.speedDown();
+  }
+}
+
+
+class Meteor{
+  constructor(x){
+    this.x = x;
+    this.y = 550;
+    this.size = 2;
+  }
+  display(){
+    imageMode(CENTER);
+    image(meteor,this.x,this.y,meteor.width*this.size,meteor.height*this.size);
+    imageMode(CORNER);
   }
 }
