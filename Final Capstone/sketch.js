@@ -5,6 +5,7 @@
 // Globals
 let shipX = 340;
 let shipSpeed = 7;
+let lives = 3;
 let aliens = [];
 let deadAliens = [];
 let shipBullets = [];
@@ -34,6 +35,9 @@ let home = true;
 let gameStart = false;
 let game = false;
 let gameOver = false;
+let shipHitTime = 0;
+let shipHitX = 0;
+let shipHitY = 0;
 let levelChangeTime = 0;
 
 
@@ -63,6 +67,7 @@ function draw() {
   startUp();
   menu();
   endGame();
+  shipExplotion(shipHitX,shipHitY);
   if(game){
     makeUFO();
     frame();
@@ -80,7 +85,7 @@ function draw() {
     }
 
     for(let m in meteors){
-      meteors[m].display();
+      meteors[m].action();
       
     }
 
@@ -153,6 +158,7 @@ function frame(){
   text("High Score " + highScore, 50, 775);
   text("Time " + time, width/2 , 775);
   text("Level " + level, width/2, 740);
+  text("Lives " + lives, width*0.8, 80);
 }
 
 
@@ -362,9 +368,26 @@ function isShipShot(){
   for(let b in alienBullets){
     if(alienBullets[b].y > 633){
       if(alienBullets[b].x > shipX-32 && alienBullets[b].x < shipX +28){
-        gameOver = true;
+        lives-=1;
+        shipHitTime = 70;
+        shipHitX = alienBullets[b].x;
+        shipHitY = alienBullets[b].y;
+        alienBullets.splice(b,1);
+        if(lives===0){
+          gameOver = true;
+        }
       }
     }
+  }
+}
+
+
+function shipExplotion(x,y){
+  if(shipHitTime>0){
+    imageMode(CENTER);
+    image(explotion,x,y,explotion.width/70,explotion.height/70);
+    imageMode(CORNER);
+    shipHitTime-+1;
   }
 }
 
@@ -753,10 +776,41 @@ class Meteor{
     this.x = x;
     this.y = 550;
     this.size = 2;
+    this.isShot = false;
+    this.dead = false;
   }
+
   display(){
     imageMode(CENTER);
     image(meteor,this.x,this.y,meteor.width*this.size,meteor.height*this.size);
     imageMode(CORNER);
   }
+
+  checkIfShot(){
+    for(let b in shipBullets){
+      if(shipBullets[b].y > 550 - 24.5*this.size && shipBullets[b].y < 550 + 24.5*this.size){
+        if(shipBullets[b].x > this.x - 24.5*this.size && shipBullets[b].x < this.x + 24.5*this.size){
+          this.isShot = true;
+          shipBullets.splice(b,1);
+        }
+      }
+    }
+  }
+
+  shrink(){
+    if (this.isShot){
+      this.size -= 0.2;
+      this.isShot = false;
+    }
+    if (this.size<0.6){
+      this.dead = true;
+    }
+  }
+
+  action(){
+    this.checkIfShot();
+    this.shrink();
+    this.display();
+  }
+
 }
