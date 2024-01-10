@@ -28,6 +28,7 @@ let alien11;
 let alien21;
 let ufo;
 let ship0;
+let ship1;
 let explotion;
 let meteor;
 let pixelFont;
@@ -36,6 +37,7 @@ let gameStart = false;
 let game = false;
 let gameOver = false;
 let shipHitTime = 0;
+let shipResetTime = 0;
 let shipHitX = 0;
 let shipHitY = 0;
 let levelChangeTime = 0;
@@ -49,6 +51,7 @@ function preload(){
   alien11 = loadImage("assets/alien11.png");
   alien21 = loadImage("assets/alien21.png");
   ship0 = loadImage("assets/ship.png");
+  ship1 = loadImage("assets/shipD.png");
   ufo = loadImage("assets/UFO.png");
   explotion = loadImage("assets/explotion.png");
   pixelFont = loadFont("assets/dogicapixel.otf");
@@ -67,14 +70,16 @@ function draw() {
   startUp();
   menu();
   endGame();
-  shipExplotion(shipHitX,shipHitY);
   if(game){
     makeUFO();
     frame();
     changeLevel();
     drawShip(shipX);
-    moveShip();
-    isShipShot();
+    shipExplotion(shipHitX,shipHitY);
+    if(shipResetTime === 0){
+      moveShip();
+      isShipShot();
+    }
   
 
     for(let d in deadAliens){
@@ -86,7 +91,9 @@ function draw() {
 
     for(let m in meteors){
       meteors[m].action();
-      
+      if(meteors[m].dead){
+        meteors.splice(m,1);
+      }
     }
 
     for(let u in ufos){
@@ -137,21 +144,29 @@ function draw() {
     if(levelChangeTime>0){
       levelChangeTime--;
     }
+    if(shipHitTime > 0){
+      shipHitTime--;
+    }
+    if(shipResetTime > 0){
+      shipResetTime--;
+    }
   }
 }
 
 
 function keyPressed(){
-  if(shipBullets.length<1){
-    if(key === " "){
-      shipBullets.push(new Bullet(shipX, 650, 5));
+  if(shipResetTime === 0){
+    if(shipBullets.length<1){
+      if(key === " "){
+        shipBullets.push(new Bullet(shipX, 650, 5));
+      }
     }
   }
 }
 
 
 function frame(){
-  fill(180,5,5);
+  fill(180,5,5); 
   rect(0,700,width,3);
   textSize(20);
   text("Score " + score, 50, 740);
@@ -184,6 +199,8 @@ function startUp(){
     generateAliens();
     generateMeteors();
     levelChangeTime = 40;
+    lives = 3;
+    shipHitTime = 0;
     game = true; 
   }
 
@@ -281,6 +298,8 @@ function changeLevel(){
 
 function endGame(){
   if(gameOver){
+    shipHitTime =0;
+    shipResetTime = 0;
     textFont(pixelFont);
     textSize(50);
     fill("red");
@@ -335,12 +354,12 @@ function endGame(){
 
 function drawShip(x){
   fill("white");
-  if (gameOver ===false){
+  if (shipResetTime===0){
     image(ship0,x,650,ship0.width+15, ship0.height+10);
   }
 
   else{
-    image(explotion,x-10,630,explotion.width/12,explotion.height/13);
+    image(ship1,x,650,ship1.width+15, ship1.height+10);
   }
 }
 
@@ -365,16 +384,19 @@ function moveShip(){
 
 
 function isShipShot(){
-  for(let b in alienBullets){
-    if(alienBullets[b].y > 633){
-      if(alienBullets[b].x > shipX-32 && alienBullets[b].x < shipX +28){
-        lives-=1;
-        shipHitTime = 70;
-        shipHitX = alienBullets[b].x;
-        shipHitY = alienBullets[b].y;
-        alienBullets.splice(b,1);
-        if(lives===0){
-          gameOver = true;
+  if(shipResetTime===0){
+    for(let b in alienBullets){
+      if(alienBullets[b].y > 633){
+        if(alienBullets[b].x > shipX-32 && alienBullets[b].x < shipX +28){
+          lives-=1;
+          shipHitTime = 40;
+          shipHitX = alienBullets[b].x;
+          shipHitY = alienBullets[b].y;
+          alienBullets.splice(b,1);
+          shipResetTime = 40;
+          if(lives===0){
+            gameOver = true;
+          }
         }
       }
     }
@@ -385,9 +407,8 @@ function isShipShot(){
 function shipExplotion(x,y){
   if(shipHitTime>0){
     imageMode(CENTER);
-    image(explotion,x,y,explotion.width/70,explotion.height/70);
+    image(explotion,x+33,y+20,explotion.width/30,explotion.height/30);
     imageMode(CORNER);
-    shipHitTime-+1;
   }
 }
 
@@ -789,7 +810,7 @@ class Meteor{
   checkIfShot(){
     for(let b in shipBullets){
       if(shipBullets[b].y > 550 - 24.5*this.size && shipBullets[b].y < 550 + 24.5*this.size){
-        if(shipBullets[b].x > this.x - 24.5*this.size && shipBullets[b].x < this.x + 24.5*this.size){
+        if(shipBullets[b].x > this.x - 59*this.size && shipBullets[b].x < this.x*this.size){
           this.isShot = true;
           shipBullets.splice(b,1);
         }
@@ -799,10 +820,10 @@ class Meteor{
 
   shrink(){
     if (this.isShot){
-      this.size -= 0.2;
+      this.size -= 0.1;
       this.isShot = false;
     }
-    if (this.size<0.6){
+    if (this.size<0.7){
       this.dead = true;
     }
   }
