@@ -41,6 +41,7 @@ let shipResetTime = 0;
 let shipHitX = 0;
 let shipHitY = 0;
 let levelChangeTime = 0;
+let alianFire = 0;
 
 
 function preload(){
@@ -292,6 +293,7 @@ function changeLevel(){
     aliens.splice(0,aliens.length);
     generateAliens();
     levelChangeTime = 30;
+    alianFire += 200;
   }
 }
 
@@ -510,13 +512,13 @@ class Alien{
 
   attack(){
     if (this.type === 1){
-      this.num = floor(random(1500));
+      this.num = floor(random(2200 - alianFire));
       if(this.num===1){
         alienBullets.push(new Bullet(this.x, this.y, 1));
       }
     }
     if (this.type === 2){
-      this.num = floor(random(1200));
+      this.num = floor(random(2200- alianFire));
       if(this.num===1){
         alienBullets.push(new Bullet(this.x, this.y, 2));
       }
@@ -809,11 +811,15 @@ class Meteor{
 
   checkIfShot(){
     for(let b in shipBullets){
-      if(shipBullets[b].y > 550 - 24.5*this.size && shipBullets[b].y < 550 + 24.5*this.size){
-        if(shipBullets[b].x > this.x - 59*this.size && shipBullets[b].x < this.x*this.size){
-          this.isShot = true;
-          shipBullets.splice(b,1);
-        }
+      if(dist(this.x-30, this.y, shipBullets[b].x,shipBullets[b].y) <24.5* this.size){
+        this.isShot = true;
+        shipBullets.splice(b,1);
+      }
+    }
+    for(let b in alienBullets){
+      if(dist(this.x-30, this.y-20, alienBullets[b].x,alienBullets[b].y) <24.5* this.size){
+        this.isShot = true;
+        alienBullets.splice(b,1);
       }
     }
   }
@@ -823,7 +829,7 @@ class Meteor{
       this.size -= 0.1;
       this.isShot = false;
     }
-    if (this.size<0.7){
+    if (this.size<0.15){
       this.dead = true;
     }
   }
