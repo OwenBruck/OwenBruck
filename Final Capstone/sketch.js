@@ -63,10 +63,17 @@ function preload(){
 function setup() {
   createCanvas(800, 800);
   noStroke();
+  if (localStorage.getItem("highScore") === null) {
+    localStorage.setItem("highScore", 0);
+  }
+  else {
+    highScore = int(localStorage.getItem("highScore"));
+  }
 }
 
 
 function draw() {
+  chechHighScore();
   background(backgroundColor); 
   startUp();
   menu();
@@ -411,6 +418,14 @@ function shipExplotion(x,y){
     imageMode(CENTER);
     image(explotion,x+33,y+20,explotion.width/30,explotion.height/30);
     imageMode(CORNER);
+  }
+}
+
+
+function chechHighScore(){
+  if(score>highScore){
+    highScore = score;
+    localStorage.setItem("highScore", highScore);
   }
 }
 
