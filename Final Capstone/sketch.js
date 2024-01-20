@@ -1,3 +1,12 @@
+//Reflection-
+//I got everything on my need to do list done, and am overall happy with
+//the outcome of the project. The most challenging part of the project
+//was likley getting the alien movement patterns to work. I had to do
+//some pretty weird stuff to get that to work. I also wanted to do the 
+//meteors differently. Origanaly i was hoping to have them made up of 
+//groups of pixels that would have a sort of AOE explosion thing, but
+//I was running out of time and couldn't figure out how best to make that
+//work, so i just went with an easier option.
 // Space Invaders
 // Owen
 // 
