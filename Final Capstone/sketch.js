@@ -20,6 +20,10 @@ let highScore = 0;
 let intervalID;
 let alienGap = 100;
 let mouseOver = false;
+let music;
+let explosion;
+let alienShot;
+let shipShot;
 let alien00;
 let alien10;
 let alien20;
@@ -43,8 +47,12 @@ let shipHitY = 0;
 let levelChangeTime = 0;
 let alianFire = 0;
 
-
+//loading all images and music
 function preload(){
+  music = loadSound("assets/music.wav");
+  explosion = loadSound("assets/explosion.wav");
+  alienShot = loadSound("assets/alienShot.wav");
+  shipShot = loadSound("assets/shipShot.wav");
   alien00 = loadImage("assets/alien00.png");
   alien10 = loadImage("assets/alien10.png");
   alien20 = loadImage("assets/alien20.png");
@@ -63,6 +71,7 @@ function preload(){
 function setup() {
   createCanvas(800, 800);
   noStroke();
+  //Finds and sets the previous high score on the computer
   if (localStorage.getItem("highScore") === null) {
     localStorage.setItem("highScore", 0);
   }
@@ -73,23 +82,28 @@ function setup() {
 
 
 function draw() {
-  chechHighScore();
   background(backgroundColor); 
+  //calling functions
+  chechHighScore();
   startUp();
   menu();
   endGame();
+  //calling gameplay functions
   if(game){
     makeUFO();
     frame();
     changeLevel();
     drawShip(shipX);
     shipExplotion(shipHitX,shipHitY);
+
+    //allows the player to move as long as not recently shot
     if(shipResetTime === 0){
       moveShip();
       isShipShot();
     }
-  
 
+    //checking and running all classes in lists
+    //removing items when nessisary
     for(let d in deadAliens){
       deadAliens[d].display();
       if(deadAliens[d].rem){
@@ -110,6 +124,8 @@ function draw() {
         ufos.splice(u,1);
       }
       else if(ufos[u].isShot === true){
+//when a UFO is killed it is removed and an explosion is created
+        explosion.play();
         deadAliens.push(new DeadAlien(ufos[u].x, ufos[u].y));
         ufos.splice(u,1);
       }
@@ -132,6 +148,8 @@ function draw() {
     for (let row in aliens){
       for (let a in aliens[row]){   
         if(aliens[row][a].isShot === true){
+//when an alien is killed it is removed and an explosion is created
+          explosion.play();
           deadAliens.push(new DeadAlien(aliens[row][a].x, aliens[row][a].y));
           aliens[row].splice(a,1);
         }
@@ -149,6 +167,8 @@ function draw() {
         aliens[row][a].display();
       }
     }
+
+//Reduces timers when nessisary
     if(levelChangeTime>0){
       levelChangeTime--;
     }
@@ -163,10 +183,13 @@ function draw() {
 
 
 function keyPressed(){
+//when space is pressed and there is no bullets on screen, a new
+//ship bullet is created.
   if(shipResetTime === 0){
     if(shipBullets.length<1){
       if(key === " "){
         shipBullets.push(new Bullet(shipX, 650, 5));
+        shipShot.play();
       }
     }
   }
@@ -174,6 +197,7 @@ function keyPressed(){
 
 
 function frame(){
+//draws all in-game information. ie scorem, time, ect...
   fill(180,5,5); 
   rect(0,700,width,3);
   textSize(20);
@@ -186,6 +210,7 @@ function frame(){
 
 
 function startUp(){
+//Resets all game information before a new game starts
   if (gameStart){ 
     if(aliens.length > 0){
       aliens.splice(0,aliens.length);
@@ -210,6 +235,7 @@ function startUp(){
     lives = 3;
     shipHitTime = 0;
     game = true; 
+    music.loop();
   }
 
   gameStart = false;
@@ -218,9 +244,9 @@ function startUp(){
 
 function menu(){
   if(home){
+//Displays all home screen information
     textFont(pixelFont);
     fill(200);
-    // rect(width/2,0,1,800);
     textSize(60);
     text("Space",270,100);
     fill("red");
@@ -235,6 +261,7 @@ function menu(){
     text("=   400 Points",325,413);
     text("=   ? Points",325,495);
     let color;
+//detects if mouse is over 'play space invaders' button
     if(mouseX > 100 && mouseX < 700){
       if(mouseY > 600 && mouseY < 700){
         mouseOver = true;
@@ -262,6 +289,7 @@ function menu(){
     fill(0);
     textSize(30);
     text("Play Space Invaders",175,665);
+    // starts the game if 'play space invaders' button is clicked.
     if(mouseOver && mouseIsPressed === true){
       home = false;
       gameStart = true;
@@ -271,6 +299,8 @@ function menu(){
 
 
 function changeLevel(){
+// when all aliens are cleared, start possition is lowered, lists
+// are cleared, and new aliens are made
   let isEmpty = false;
   for(let a in aliens){
     if(aliens[a].length === 0){
@@ -307,6 +337,8 @@ function changeLevel(){
 
 function endGame(){
   if(gameOver){
+// displays all information on the game over menue
+    music.stop();
     shipHitTime =0;
     shipResetTime = 0;
     textFont(pixelFont);
@@ -325,6 +357,7 @@ function endGame(){
     image(ufo,692,410,ufo.width+15,ufo.height+10);
     game = false;
     backgroundColor = 0;
+    //detects if mouse is over 'menue' button
     if(mouseX > 300 && mouseX < 500){
       if(mouseY > 700 && mouseY < 770){
         mouseOver = true;
@@ -352,6 +385,7 @@ function endGame(){
     fill(0);
     textSize(30);
     text("Menu",345,750);
+    //sends the player home if menue button is clicked
     if(mouseOver && mouseIsPressed === true){
       home = true;
       gameOver = false;
@@ -362,6 +396,7 @@ function endGame(){
 
 
 function drawShip(x){
+  //draws the ship
   fill("white");
   if (shipResetTime===0){
     image(ship0,x,650,ship0.width+15, ship0.height+10);
@@ -375,6 +410,7 @@ function drawShip(x){
 
 function moveShip(){
   if(gameOver === false){
+    //allows the arrows to move the ship
     if (keyIsDown(LEFT_ARROW)){
       shipX -= shipSpeed;
       if (shipX<0){
@@ -393,11 +429,13 @@ function moveShip(){
 
 
 function isShipShot(){
+  //checks if player has been hit by aliens
   if(shipResetTime===0){
     for(let b in alienBullets){
       if(alienBullets[b].y > 633){
         if(alienBullets[b].x > shipX-32 && alienBullets[b].x < shipX +28){
           lives-=1;
+          explosion.play();
           shipHitTime = 40;
           shipHitX = alienBullets[b].x;
           shipHitY = alienBullets[b].y;
@@ -415,6 +453,7 @@ function isShipShot(){
 
 function shipExplotion(x,y){
   if(shipHitTime>0){
+    //makes a small explosion when the ship is hit
     imageMode(CENTER);
     image(explotion,x+33,y+20,explotion.width/30,explotion.height/30);
     imageMode(CORNER);
@@ -423,6 +462,7 @@ function shipExplotion(x,y){
 
 
 function chechHighScore(){
+  //checks and sets if the current score is higher than the high score
   if(score>highScore){
     highScore = score;
     localStorage.setItem("highScore", highScore);
@@ -431,6 +471,7 @@ function chechHighScore(){
 
 
 function generateAliens(){
+  //fills a 2-d list with three different types of aliens
   let tempArray =[];
   for(let y = 40; y <= 200; y += 40){
     tempArray = [];
@@ -454,6 +495,7 @@ function generateAliens(){
 
 
 function generateMeteors(){
+  //fills a list with meteor objects
   let gap =205;
   for(let i = 0.5; i <4.5; i++){
     meteors.push(new Meteor(gap*i));
@@ -462,6 +504,8 @@ function generateMeteors(){
 
 function makeUFO(){
   if(ufos.length<1){
+    //when there are no UFOs on screen, theres a random chace that one
+    //will be created
     let r = floor(random(500));
     if(r===1){
       ufos.push(new UFO());
@@ -469,6 +513,7 @@ function makeUFO(){
   }
 }
 
+//makes in game timer
 intervalID = setInterval(timer, 1000);
 function timer(){
   if(gameOver === false){
@@ -479,6 +524,7 @@ function timer(){
 
 class Alien{
   constructor(x,y,type){
+    //sets alien variables
     this.type = type;
     this.x = x;
     this.y = y;
@@ -490,6 +536,7 @@ class Alien{
 
 
   display(){
+    //draws different aliens
     if (this.type === 0){
       fill("red");
       if (this.version === 0){
@@ -526,15 +573,18 @@ class Alien{
 
 
   attack(){
+    //lets the aliens randomly shoot projectiles depending on alien type
     if (this.type === 1){
       this.num = floor(random(2200 - alianFire));
       if(this.num===1){
+        alienShot.play();
         alienBullets.push(new Bullet(this.x, this.y, 1));
       }
     }
     if (this.type === 2){
       this.num = floor(random(2200- alianFire));
       if(this.num===1){
+        alienShot.play();
         alienBullets.push(new Bullet(this.x, this.y, 2));
       }
     }
@@ -542,6 +592,7 @@ class Alien{
 
 
   changeSprite(){
+    //flips between alien moving sprites
     if (frameCount % 30 === 0){
       if (this.version === 0){
         this.version = 1;
@@ -555,6 +606,7 @@ class Alien{
 
 
   checkIfShot(){
+    //checks if alien has been shot by player
     if(this.type === 0 || this.type ===1){
       for(let b in shipBullets){
         if (shipBullets[b].x >= this.x-33 && shipBullets[b].x <= this.x + 10){
@@ -591,6 +643,7 @@ class Alien{
 
 
   move(){
+    //slides aliens across the screen
     if(frameCount % 30 === 0){
       
       if(this.needToDrop === 1){
@@ -606,6 +659,7 @@ class Alien{
 
 
   changeDirection(){
+    //flips the derection that aliens move
     this.speed *= -1;
     this.needToDrop = 1;
   }
@@ -613,6 +667,8 @@ class Alien{
 
   action(){
     if(!gameOver){
+      //flips derection for all aliens when one is at the side 
+      //of teh screen.
       if(this.x>width-75 && this.speed > 0){
         for (let row in aliens){
           for (let a in aliens[row]){
@@ -628,11 +684,12 @@ class Alien{
           }
         }
       }
-
+   //ends game if aliens are too low
       if(this.y > 650){
         gameOver= true;
       }  
       if(levelChangeTime<1){
+        //calls all alien functions
         this.move(); 
         this.changeSprite();
         this.checkIfShot();
@@ -645,6 +702,7 @@ class Alien{
 
 class DeadAlien{
   constructor(x,y){
+    //sets dead alien variables
     this.x = x;
     this.y = y;
     this.moveX = 0;
@@ -656,7 +714,7 @@ class DeadAlien{
   display(){
     this.timer -= 1;
     this.moveX += 0.3;
-    
+    //draws explosions
     if(aliens[0].length>0){
       if(aliens[0][0].speed>1){
         image(explotion,this.x-7+this.moveX,this.y,explotion.width/16,explotion.height/16);
@@ -666,7 +724,7 @@ class DeadAlien{
         image(explotion,this.x-7-this.moveX,this.y,explotion.width/16,explotion.height/16);
       }
     }
-
+    //removes explosions when timers out
     if(this.timer <= 0){
       this.rem =true;
     }
@@ -676,6 +734,7 @@ class DeadAlien{
 
 class Bullet{
   constructor(x,y, type){
+    //creates class variables
     this.x = x;
     this.y = y;
     this.type = type;
@@ -685,6 +744,7 @@ class Bullet{
   
 
   display(){
+    //draws bullets based on type
     if (this.type === 5){
       fill(77,200,240);
       rect(this.x + 30,this.y+15,3,10);
@@ -703,6 +763,7 @@ class Bullet{
 
 
   move(){
+    //moves bullets based on type
     if (this.type === 5){
       this.y -= this.bulletSpeed; 
     }
@@ -718,6 +779,7 @@ class Bullet{
 
 
   action(){
+    //calls bullet functions
     if (gameOver === false){
       this.move();
     }
@@ -729,11 +791,13 @@ class Bullet{
 
 class UFO{
   constructor(){
+    //creates class variables
     this.y = 100;
     this.speed = 10;
     this.randomVal = floor(random(0,2));
     this.offScreen = false;
     this.isShot = false;
+    //randomly sets starting x
     if(this.randomVal === 0){
       this.x = -50;
       this.speed = 4;
@@ -745,12 +809,12 @@ class UFO{
   }
 
   display(){
+    //draws UFO
     image(ufo,this.x,this.y);
   }
 
   move(){
-    //updates x pos. baces on xspeed. 
-    //If vehicle goes off screen its moved to the other side
+    //updates x pos. baces on speed, and detects when it goes off screen
     if(this.randomVal === 0){
       this.x+= this.speed;
       if(this.x>width+50){
@@ -765,14 +829,17 @@ class UFO{
       }
     }
   }
+
+  //randomly speeds up UFO
   speedUp(){
     if(this.speed <7){
       this.speed += random(1,2);
     }     
   }
 
+
+  //Randomly slows down UFO
   speedDown(){
-    //slowing down vehicle
     this.speed -= random(1,2);
     if(this.speed < 2 ){
       this.speed = 3;
@@ -780,6 +847,7 @@ class UFO{
   }
 
   checkIfShot(){
+    //detects if UFO has been shot by player
     for(let b in shipBullets){
       if(shipBullets[b].x >= this.x-33 && shipBullets[b].x <= this.x + 16){
         if(shipBullets[b].y >= this.y && shipBullets[b].y <= this.y + 35){
@@ -800,6 +868,7 @@ class UFO{
   }
 
   action(){
+    //calls class functions
     this.display();
     this.checkIfShot();
     this.move();
@@ -811,6 +880,7 @@ class UFO{
 
 class Meteor{
   constructor(x){
+    //sets class vars
     this.x = x;
     this.y = 550;
     this.size = 2;
@@ -819,12 +889,14 @@ class Meteor{
   }
 
   display(){
+    //draws meteor
     imageMode(CENTER);
     image(meteor,this.x,this.y,meteor.width*this.size,meteor.height*this.size);
     imageMode(CORNER);
   }
 
   checkIfShot(){
+    //detects if meteor has been hit by player of alien
     for(let b in shipBullets){
       if(dist(this.x-30, this.y, shipBullets[b].x,shipBullets[b].y) <24.5* this.size){
         this.isShot = true;
@@ -840,6 +912,7 @@ class Meteor{
   }
 
   shrink(){
+    //redusec the size of meteor to a point, then removes it
     if (this.isShot){
       this.size -= 0.1;
       this.isShot = false;
@@ -850,9 +923,9 @@ class Meteor{
   }
 
   action(){
+    //calls all class functions
     this.checkIfShot();
     this.shrink();
     this.display();
   }
-
 }
